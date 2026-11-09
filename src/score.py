@@ -6,7 +6,7 @@ import pandas as pd
 DB_PATH = "data/weatherwise.db"
 
 ACTIVITIES = {
-    "running": {
+    "skating": {
         "feels_min": 5,
         "feels_max": 18,
         "max_rain_prob": 30,

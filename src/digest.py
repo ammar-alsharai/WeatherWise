@@ -10,7 +10,7 @@ load_dotenv()  # reads your .env file
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-EMOJI = {"running": "🏃", "cycling": "🚲", "walking": "🚶"}
+EMOJI = {"skating": "⛸", "cycling": "🚲", "walking": "🚶"}
 
 
 def build_message(result):

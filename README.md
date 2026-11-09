@@ -7,7 +7,7 @@ Every morning, WeatherWise fetches the weather and air quality forecast, stores 
 ```
 ☀️ WeatherWise: The Hague today
 
-🏃 Running: 13:00–15:00 (score 78)
+⛸ Skating: 13:00–15:00 (score 78)
 🚲 Cycling: 13:00–15:00 (score 64)
 🚶 Walking: 12:00–14:00 (score 90)
 
