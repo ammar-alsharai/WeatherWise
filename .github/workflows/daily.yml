@@ -1,0 +1,38 @@
+name: Daily WeatherWise
+
+on:
+  schedule:
+    - cron: "30 5 * * *"   # 05:30 UTC = 06:30 in winter, 07:30 in summer (NL)
+  workflow_dispatch:        # adds a "Run workflow" button for testing
+
+permissions:
+  contents: write           # allows the job to push the updated database
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Amsterdam   # so "today" and "now" in Python mean Dutch time
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"   # change to match your local version
+
+      - name: Install packages
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        run: python src/pipeline.py
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Save database to the repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/weatherwise.db
+          git commit -m "Daily forecast $(date +%F)" || echo "No changes"
+          git push
