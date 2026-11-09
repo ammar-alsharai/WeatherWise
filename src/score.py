@@ -94,11 +94,10 @@ def best_window(df, score_column):
     return start_time, end_time, average_score
 
 
-if __name__ == "__main__":
-    with sqlite3.connect(DB_PATH) as conn:
-        df = load_latest_forecast(conn)
+def recommend(conn):
+    df = load_latest_forecast(conn)
 
-    # Only today, between 07:00 and 22:00
+  
     today = pd.Timestamp(date.today())
     now = pd.Timestamp.now().floor("h")
     df = df[
@@ -107,13 +106,22 @@ if __name__ == "__main__":
         & (df["forecast_time"].dt.hour.between(7, 21))
     ]
     df = df.reset_index(drop=True)
-    if len(df) < 2:
-        print("Not enough hours left today. Try again tomorrow morning.")
-        raise SystemExit
 
+    # Before: print + raise SystemExit. Now: return None ("no result")
+    if len(df) < 2:
+        return None
+
+ 
+    windows = []
     for activity, rules in ACTIVITIES.items():
         df[f"score_{activity}"] = df.apply(score_hour, axis=1, args=(rules,))
         start, end, avg = best_window(df, f"score_{activity}")
-        print(f"{activity:8} best: {start:%H:%M}–{end:%H:%M} (score {avg:.0f})")
+        windows.append({"activity": activity, "start": start, "end": end, "score": avg})
 
-    print(f"Air quality now: {aqi_label(df.loc[0, 'european_aqi'])}")
+    return {"windows": windows, "air_quality": aqi_label(df.loc[0, "european_aqi"])}
+
+
+if __name__ == "__main__":
+    with sqlite3.connect(DB_PATH) as conn:
+        result = recommend(conn)
+    print(result)
