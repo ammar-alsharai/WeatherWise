@@ -33,9 +33,9 @@ def build_message(result):
 
 
 def send_telegram(text):
-    if not TOKEN or not CHAT_ID:
-        raise RuntimeError("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing. Check your .env file.")
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    if not TOKEN or not CHAT_ID:
+            raise RuntimeError("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing. Check your .env file.")
     response = requests.post(url, data={"chat_id": CHAT_ID, "text": text}, timeout=30)
     response.raise_for_status()
 

@@ -47,16 +47,19 @@ def save_forecast(conn, df):
     conn.commit()
 
 
-if __name__ == "__main__":
+def load_latest(conn):
     weather_df = build_hourly_table(load_latest_raw("forecast"))
     aq_df = build_air_quality_table(load_latest_raw("air_quality"))
     df = prepare_for_db(weather_df.merge(aq_df, on="time", how="left"))
+    conn.execute(CREATE_TABLE_SQL)
+    save_forecast(conn, df)
 
+
+if __name__ == "__main__":
     with sqlite3.connect(DB_PATH) as conn:
-        conn.execute(CREATE_TABLE_SQL)
-        save_forecast(conn, df)
-        rows = conn.execute(
-            "SELECT fetched_date, COUNT(*) FROM forecasts GROUP BY fetched_date"
-        ).fetchall()
-        for row in rows:
-            print(f"{row[0]}: {row[1]} rows")
+        load_latest(conn)
+        print(
+            conn.execute(
+                "SELECT fetched_date, COUNT(*) FROM forecasts GROUP BY fetched_date"
+            ).fetchall()
+        )
