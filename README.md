@@ -1,6 +1,6 @@
 # WeatherWise 🌤️
 
-**A daily data pipeline that tells me the best time to run, cycle or walk outside in The Hague.**
+**A daily data pipeline that tells me the best time to skate, cycle or walk outside in The Hague.**
 
 Every morning, WeatherWise fetches the weather and air quality forecast, stores it in a database, scores every hour for each activity, and sends the result to my phone on Telegram. It runs automatically in the cloud with GitHub Actions.
 
