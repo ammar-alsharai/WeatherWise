@@ -7,11 +7,12 @@ DB_PATH = "data/weatherwise.db"
 
 ACTIVITIES = {
     "skating": {
-        "feels_min": 5,
-        "feels_max": 18,
-        "max_rain_prob": 30,
-        "max_wind_bft": 4,
-        "max_gust_bft": 6,
+        "feels_min": 8,
+        "feels_max": 25,
+        "max_rain_prob": 10,
+        "max_wind_bft": 3,
+        "max_gust_bft": 5,
+        "wet_road_penalty": 40,
     },
     "cycling": {
         "feels_min": 5,
@@ -79,7 +80,8 @@ def score_hour(row, rules):
         score -= 30
     elif row["european_aqi"] > 40:
         score -= 10
-
+    if rules.get("wet_road_penalty", 0) and row["rain_last_2h"] > 0.2:
+        score -= rules["wet_road_penalty"]
     return max(score, 0)
 
 
@@ -97,7 +99,9 @@ def best_window(df, score_column):
 def recommend(conn):
     df = load_latest_forecast(conn)
 
-  
+    df["rain_last_2h"] = df["precipitation"].shift(1).fillna(0) + df[
+        "precipitation"
+    ].shift(2).fillna(0)
     today = pd.Timestamp(date.today())
     now = pd.Timestamp.now().floor("h")
     df = df[
@@ -111,7 +115,6 @@ def recommend(conn):
     if len(df) < 2:
         return None
 
- 
     windows = []
     for activity, rules in ACTIVITIES.items():
         df[f"score_{activity}"] = df.apply(score_hour, axis=1, args=(rules,))
