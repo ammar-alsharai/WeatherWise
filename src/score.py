@@ -96,12 +96,9 @@ def best_window(df, score_column):
     return start_time, end_time, average_score
 
 
-def recommend(conn):
+def todays_hours(conn):
     df = load_latest_forecast(conn)
-
-    df["rain_last_2h"] = df["precipitation"].shift(1).fillna(0) + df[
-        "precipitation"
-    ].shift(2).fillna(0)
+    df["rain_last_2h"] = df["precipitation"].shift(1).fillna(0) + df["precipitation"].shift(2).fillna(0)
     today = pd.Timestamp(date.today())
     now = pd.Timestamp.now().floor("h")
     df = df[
@@ -109,9 +106,10 @@ def recommend(conn):
         & (df["forecast_time"].dt.normalize() == today)
         & (df["forecast_time"].dt.hour.between(7, 21))
     ]
-    df = df.reset_index(drop=True)
+    return df.reset_index(drop=True)
 
-    # Before: print + raise SystemExit. Now: return None ("no result")
+
+def recommend(df):
     if len(df) < 2:
         return None
 
@@ -126,5 +124,5 @@ def recommend(conn):
 
 if __name__ == "__main__":
     with sqlite3.connect(DB_PATH) as conn:
-        result = recommend(conn)
-    print(result)
+        df = todays_hours(conn)
+    print(recommend(df))
